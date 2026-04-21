@@ -3,6 +3,8 @@ import os
 import setproctitle
 import signal
 import sys
+# Windows 安装包可能从任意 CWD 启动 app/main.py，手动把 CWD 加入 sys.path 保证 import 正常
+sys.path.append(os.getcwd())
 import threading
 from pathlib import Path
 
