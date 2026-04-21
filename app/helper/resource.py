@@ -122,6 +122,10 @@ class ResourceHelper:
                             file_name = item.get("name")
                             if file_name not in needed_files:
                                 continue
+                            # Windows 版：sites.*.pyd 只允许以安装包方式更新，避免破坏签名校验
+                            if file_name and file_name.endswith(".pyd"):
+                                logger.warn(f"{file_name} 只允许以安装包方式进行更新")
+                                continue
                             save_path = need_updates.get(file_name)
                             if not save_path:
                                 continue
@@ -150,8 +154,8 @@ class ResourceHelper:
                                     file_path.parent.mkdir(parents=True, exist_ok=True)
                                 file_path.write_bytes(res.content)
                         if success:
-                            logger.info("资源包更新完成，开始重启服务...")
-                            SystemHelper.restart()
+                            # Windows 版：资源包更新完成后不自动重启，由托盘/安装器触发
+                            logger.info("资源包更新完成...")
                         else:
                             logger.warn("资源包更新失败，跳过升级！")
                     else:
