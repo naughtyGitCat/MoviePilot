@@ -719,16 +719,18 @@ class SystemUtils:
     @staticmethod
     def restart() -> Tuple[bool, str]:
         """
-        Windows 环境下通过 RebotMP.exe 执行重启
+        Windows 环境下通过 RebotMP.exe 或 RebotMP.bat 执行重启
         """
-        try:
-            subprocess.run(
-                ["start", "", str(Path(__file__).parents[2].parent / "RebotMP.exe")],
-                shell=True,
-            )
-            return True, ""
-        except Exception as err:
-            return False, f"重启时发生错误：{str(err)}"
+        base = Path(__file__).parents[2].parent
+        for name in ("RebotMP.exe", "RebotMP.bat"):
+            target = base / name
+            if target.exists():
+                try:
+                    subprocess.run(["start", "", str(target)], shell=True)
+                    return True, ""
+                except Exception as err:
+                    return False, f"重启时发生错误：{str(err)}"
+        return False, f"未找到重启程序：{base / 'RebotMP.exe'}"
 
     @staticmethod
     def network_usage() -> List[int]:
