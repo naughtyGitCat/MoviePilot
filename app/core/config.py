@@ -63,13 +63,13 @@ class ConfigModel(BaseModel):
     # API路径
     API_V1_STR: str = "/api/v1"
     # 前端资源路径
-    FRONTEND_PATH: str = "/public"
+    FRONTEND_PATH: str = "../../Nginx1.15.11/html/MoviePilot-Frontend"
     # 时区
     TZ: str = "Asia/Shanghai"
     # API监听地址
     HOST: str = "0.0.0.0"
     # API监听端口
-    PORT: int = 3001
+    PORT: int = 3111
     # 前端监听端口
     NGINX_PORT: int = 3000
     # 配置文件目录
@@ -243,7 +243,7 @@ class ConfigModel(BaseModel):
     # 重启自动升级
     MOVIEPILOT_AUTO_UPDATE: str = "release"
     # 自动检查和更新站点资源包（站点索引、认证等）
-    AUTO_UPDATE_RESOURCE: bool = True
+    AUTO_UPDATE_RESOURCE: bool = False
 
     # ==================== 媒体文件格式配置 ====================
     # 支持的视频文件后缀格式
