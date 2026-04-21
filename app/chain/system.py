@@ -56,8 +56,8 @@ class SystemChain(ChainBase):
         self.backup_plugins()
         # 设置停止标志，通知所有模块准备停止
         global_vars.stop_system()
-        # 重启
-        SystemHelper.restart()
+        # 重启 (Windows: 通过 RebotMP.exe; 其他: SystemHelper)
+        SystemUtils.restart()
 
     @staticmethod
     def backup_plugins():

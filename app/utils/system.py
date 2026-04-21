@@ -710,6 +710,27 @@ class SystemUtils:
         )
 
     @staticmethod
+    def can_restart() -> bool:
+        """
+        判断是否可以内部重启 (Windows 环境下通过 RebotMP.exe 重启)
+        """
+        return Path("/var/run/docker.sock").exists()
+
+    @staticmethod
+    def restart() -> Tuple[bool, str]:
+        """
+        Windows 环境下通过 RebotMP.exe 执行重启
+        """
+        try:
+            subprocess.run(
+                ["start", "", str(Path(__file__).parents[2].parent / "RebotMP.exe")],
+                shell=True,
+            )
+            return True, ""
+        except Exception as err:
+            return False, f"重启时发生错误：{str(err)}"
+
+    @staticmethod
     def network_usage() -> List[int]:
         """
         获取当前网络流量（上行和下行流量，单位：bytes/s）
