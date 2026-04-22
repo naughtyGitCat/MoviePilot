@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -26,6 +25,8 @@ def mount_frontend(app: FastAPI) -> None:
     """
     在 app 上挂载 /assets 静态目录和 SPA fallback。
     必须在所有 API 路由注册之后调用，避免 catch-all 吞掉 API 请求。
+    注意: MoviePilot 的 init_routers 是在 lifespan 内调用的, 此时 FastAPI
+    已经启动, 不能再 add_middleware。gzip 压缩需要反代层解决。
     """
     if not _enabled():
         return
@@ -35,8 +36,6 @@ def mount_frontend(app: FastAPI) -> None:
     frontend = Path(settings.FRONTEND_PATH).resolve()
     if not frontend.is_dir():
         return
-
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     assets = frontend / "assets"
     if assets.is_dir():
