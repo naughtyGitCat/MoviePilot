@@ -16,6 +16,4 @@ def init_routers(app: FastAPI):
     app.include_router(arr_router, prefix="/api/v3")
     # CookieCloud路由
     app.include_router(cookie_router, prefix="/cookiecloud")
-    # 可选前端静态托管 (MOVIEPILOT_SERVE_FRONTEND=true 启用, 必须最后挂载)
-    from app.static_mount import mount_frontend
-    mount_frontend(app)
+    # 前端静态托管已挪到 app/factory.py 的 create_app (必须在 lifespan 之前注册才有效)

@@ -67,6 +67,14 @@ def create_app() -> FastAPI:
         finally:
             LocaleHelper.reset_current_locale(token)
 
+    # 可选前端静态托管 (MOVIEPILOT_SERVE_FRONTEND=true 启用)
+    # 必须在 app 启动前注册, 所以放在 create_app 内, 而不是 lifespan 的 init_routers
+    # 注: mount_frontend 按 status-code(404) 注册 handler, 与上游按异常类注册的
+    #     localized_http_exception_handler 分属 Starlette 的两个键空间。404 优先
+    #     命中 status handler (SPA fallback), 其余 HTTPException 仍走上游 i18n handler。
+    from app.static_mount import mount_frontend
+    mount_frontend(_app)
+
     return _app
 
 
