@@ -4,17 +4,26 @@
 
 通过环境变量 MOVIEPILOT_SERVE_FRONTEND=true 启用；默认 no-op，以保持与
 Docker / Nginx 部署方式的完全兼容。
+
+实现策略:
+- /assets/ 目录通过 StaticFiles mount 提供
+- 其他静态文件 (favicon, version.txt, manifest 等) 通过 404 exception handler 解析:
+  * 优先走 FastAPI 路由, API 没命中时才进入 handler
+  * handler 检查是否是 API 路径前缀 (api/, cookiecloud, docs, redoc, openapi.json)
+    → 是则保留原 404; 否则尝试找 frontend 下的实际文件或返回 index.html
+- 这样不会抢占 FastAPI 的 /docs、/redoc、/api/v*/openapi.json 等内置路由
 """
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 
 _ENV_FLAG = "MOVIEPILOT_SERVE_FRONTEND"
-_API_PREFIXES = ("api/", "cookiecloud")
+# 下列前缀的 404 不做 SPA fallback, 直接返回 JSON 404
+_RESERVED_PREFIXES = ("/api/", "/cookiecloud/", "/docs", "/redoc", "/openapi.json")
 
 
 def _enabled() -> bool:
@@ -23,10 +32,7 @@ def _enabled() -> bool:
 
 def mount_frontend(app: FastAPI) -> None:
     """
-    在 app 上挂载 /assets 静态目录和 SPA fallback。
-    必须在所有 API 路由注册之后调用，避免 catch-all 吞掉 API 请求。
-    注意: MoviePilot 的 init_routers 是在 lifespan 内调用的, 此时 FastAPI
-    已经启动, 不能再 add_middleware。gzip 压缩需要反代层解决。
+    mount /assets StaticFiles + 注册 404 exception handler 实现 SPA fallback。
     """
     if not _enabled():
         return
@@ -37,16 +43,37 @@ def mount_frontend(app: FastAPI) -> None:
     if not frontend.is_dir():
         return
 
+    index_file = frontend / "index.html"
+    if not index_file.is_file():
+        return
+
+    # /assets/ 长缓存静态资源
     assets = frontend / "assets"
     if assets.is_dir():
         app.mount("/assets", StaticFiles(directory=assets), name="assets")
 
-    @app.get("/{full_path:path}", include_in_schema=False)
-    async def _spa_fallback(full_path: str):
-        # 已注册的 API 前缀留给 FastAPI 路由匹配；到这里说明真的没命中
-        if full_path.startswith(_API_PREFIXES):
-            raise HTTPException(status_code=404)
-        candidate = frontend / full_path
+    @app.exception_handler(404)
+    async def _spa_fallback(request: Request, exc):
+        """
+        只有在 FastAPI 的所有路由都没匹配时才会进到这里。
+        """
+        path = request.url.path
+
+        # 不对 API 路径做 SPA fallback, 让客户端真实看到 404
+        for prefix in _RESERVED_PREFIXES:
+            if path.startswith(prefix):
+                return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+        # 尝试作为前端目录下的文件提供 (例如 /favicon.ico, /version.txt, /manifest.webmanifest)
+        candidate = frontend / path.lstrip("/")
+        try:
+            # 防止路径穿越到 frontend 之外
+            candidate.resolve().relative_to(frontend)
+        except (ValueError, OSError):
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+
         if candidate.is_file():
             return FileResponse(candidate)
-        return FileResponse(frontend / "index.html")
+
+        # 其他情况返回 SPA 主页, 让前端路由接管
+        return FileResponse(index_file)
