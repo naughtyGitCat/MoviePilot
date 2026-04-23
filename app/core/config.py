@@ -68,8 +68,9 @@ class ConfigModel(BaseModel):
     TZ: str = "Asia/Shanghai"
     # API监听地址
     HOST: str = "0.0.0.0"
-    # API监听端口
-    PORT: int = 3111
+    # API监听端口 (上游 jxxghp Docker 默认 3001 是内部端口, 3000 是 Nginx 前端;
+    # 我们去 Nginx 后单端口对外, 沿用 3000 让用户体验和 Docker 一致)
+    PORT: int = 3000
     # 前端监听端口
     NGINX_PORT: int = 3000
     # 配置文件目录
