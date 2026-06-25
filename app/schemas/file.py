@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from pathlib import Path
@@ -24,7 +25,9 @@ class FileURI(BaseModel):
                 path = uri[len(protocol):]
                 storage = s.value
                 break
-        if not path.startswith("/"):
+        # Windows 盘符绝对路径(如 G:/...)本身就是绝对路径，不应再补前导 "/"；
+        # 否则会变成 /G:/... → Path() 在 Windows 上转回 \G:\... 触发 WinError 123
+        if not path.startswith("/") and not re.match(r"^[A-Za-z]:", path):
             path = "/" + path
         path = Path(path).as_posix()
         return cls(storage=storage, path=path)
