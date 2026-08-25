@@ -8,7 +8,11 @@ windows: restart service via bundled RebotMP
 windows: pin sites.pyd updates to installer
 windows: optional FastAPI StaticFiles frontend mount
 docs: add REBASE.md with v3-static sync procedure
+windows: wait on fsproxy pipes without select()
+fix(subscribe): map v2 tmdbid source to media_id
 ```
+
+后两条同时在往 `jxxghp/MoviePilot` `v3` 提 PR。合入后下次 rebase 会变成上游历史，从本列表拿掉即可。
 
 v2-static 里已经不需要再移植的改动：
 
