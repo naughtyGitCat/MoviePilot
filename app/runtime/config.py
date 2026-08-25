@@ -92,8 +92,9 @@ class ConfigModel(BaseModel):
     TZ: str = "Asia/Shanghai"
     # API监听地址
     HOST: str = "0.0.0.0"
-    # API监听端口
-    PORT: int = 3001
+    # API监听端口 (上游 Docker 默认 3001 是内部端口, 3000 是 Nginx 前端;
+    # Windows 安装版去 Nginx 后单端口对外, 沿用 3000 让用户体验和 Docker 一致)
+    PORT: int = 3000
     # 前端监听端口
     NGINX_PORT: int = 3000
     # 配置文件目录
@@ -321,7 +322,8 @@ class ConfigModel(BaseModel):
     # 开发版仍可在启动时跟踪 v3 分支；Release 更新由后台更新服务管理。
     MOVIEPILOT_AUTO_UPDATE: str = "false"
     # 自动检查和更新站点资源包（站点索引、认证等）
-    AUTO_UPDATE_RESOURCE: bool = True
+    # Windows 安装版默认关 .pyd 热更; app.env 仍可覆盖为 True 以刷新 .bin
+    AUTO_UPDATE_RESOURCE: bool = False
 
     # ==================== 媒体文件格式配置 ====================
     # 支持的视频文件后缀格式
