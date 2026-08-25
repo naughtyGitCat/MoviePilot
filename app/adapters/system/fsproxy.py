@@ -25,7 +25,7 @@ import subprocess
 import sys
 import threading
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from app.runtime.settings import RuntimeSettingsCompat
 
@@ -388,7 +388,7 @@ class FileSystemProxy:
         if self._process is None or self._process.stdout is None:
             raise BrokenPipeError("文件系统代理进程已退出")
         stdout = self._process.stdout
-        holder: List[Any] = []
+        holder: List[Union[bytes, BaseException]] = []
 
         def _read() -> None:
             try:
