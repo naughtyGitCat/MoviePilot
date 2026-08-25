@@ -16,7 +16,7 @@ from app.runtime.settings import RuntimeSettingsCompat
 settings = RuntimeSettingsCompat()
 from app.runtime.log import logger
 from app.runtime.reload import ConfigReloadMixin
-from app.foundation.environment import is_docker
+from app.foundation.environment import is_docker, is_frozen, is_windows
 
 
 class SystemHelper(ConfigReloadMixin):
@@ -51,9 +51,14 @@ class SystemHelper(ConfigReloadMixin):
     @staticmethod
     def can_restart() -> bool:
         """
-        判断是否可以内部重启
+        判断是否可以内部重启。
+        Windows 安装版通过 RebotMP.bat 重启, 非冻结进程即可。
         """
-        return is_docker() or SystemHelper._is_local_cli_managed()
+        return (
+            is_docker()
+            or SystemHelper._is_local_cli_managed()
+            or (is_windows() and not is_frozen())
+        )
 
     @staticmethod
     def _load_runtime_file(path: Path) -> Optional[dict]:
@@ -240,8 +245,13 @@ class SystemHelper(ConfigReloadMixin):
     @staticmethod
     def restart() -> Tuple[bool, str]:
         """
-        执行Docker重启操作
+        执行重启操作。Windows 安装版优先走 RebotMP, 其余保持 Docker / CLI 路径。
         """
+        if is_windows() and not is_frozen():
+            from app.adapters.system.host import SystemUtils
+
+            return SystemUtils.restart()
+
         if not is_docker():
             if not SystemHelper._is_local_cli_managed():
                 return False, "当前实例不是由 moviepilot CLI 启动，无法执行内建重启！"

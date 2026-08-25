@@ -1026,6 +1026,23 @@ class SystemUtils:
         )
 
     @staticmethod
+    def restart() -> Tuple[bool, str]:
+        """
+        Windows 安装版通过同级目录的 RebotMP.exe / RebotMP.bat 重启服务。
+        host.py 位于 app/adapters/system/, parents[3] 是源码根, 再 parent 是安装根。
+        """
+        base = Path(__file__).resolve().parents[3].parent
+        for name in ("RebotMP.exe", "RebotMP.bat"):
+            target = base / name
+            if target.exists():
+                try:
+                    subprocess.run(["start", "", str(target)], shell=True, check=False)
+                    return True, ""
+                except Exception as err:
+                    return False, f"重启时发生错误：{str(err)}"
+        return False, f"未找到重启程序：{base / 'RebotMP.exe'}"
+
+    @staticmethod
     def network_usage() -> List[int]:
         """
         获取当前网络流量（上行和下行流量，单位：bytes/s）
