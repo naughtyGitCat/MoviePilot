@@ -248,6 +248,10 @@ class ResourceHelper:
         download_files: list[dict[str, Any]] = []
         for resource in update_info.get("files") or []:
             name = str(resource.get("name") or "")
+            # Windows 版：sites.*.pyd 只允许以安装包方式更新，避免破坏签名校验
+            if name.endswith(".pyd"):
+                logger.warning(f"{name} 只允许以安装包方式进行更新")
+                continue
             remote = files_by_name.get(name) or {}
             if not remote.get("download_url"):
                 raise RuntimeError(f"资源仓库缺少下载地址：{name}")
