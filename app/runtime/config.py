@@ -189,7 +189,7 @@ class ConfigModel(BaseModel):
     FRONTEND_PATH: str = Field(default="/public", description='前端资源路径')
     TZ: str = Field(default="Asia/Shanghai", description='时区')
     HOST: str = Field(default="0.0.0.0", description='API监听地址')
-    PORT: int = Field(default=3001, description='API监听端口')
+    PORT: int = Field(default=3000, description='API监听端口')
     NGINX_PORT: int = Field(default=3000, description='前端监听端口')
     CONFIG_DIR: Optional[str] = Field(default=None, description='配置文件目录')
     MOVIEPILOT_SAFE_MODE: bool = Field(default=False, description='安全模式，仅保留核心 API，跳过插件、调度器、监控、命令和工作流等扩展启动项')
@@ -403,7 +403,7 @@ class ConfigModel(BaseModel):
     MOVIEPILOT_UPDATE_DEV: Annotated[
         bool, SettingPolicy(serialize=_serialize_bool)
     ] = Field(default=False, description='Docker 启动时跟踪开发分支；本地 CLI 仅在手动 update 时默认使用 DEV 模式。')
-    AUTO_UPDATE_RESOURCE: bool = Field(default=True, description='后台检查站点资源包，确认后由启动器在进程拉起前应用')
+    AUTO_UPDATE_RESOURCE: bool = Field(default=False, description='后台检查站点资源包，确认后由启动器在进程拉起前应用')
 
     # 媒体文件格式配置
     RMT_MEDIAEXT: list = Field(
