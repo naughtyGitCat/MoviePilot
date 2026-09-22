@@ -263,7 +263,10 @@ class SystemHelper(ConfigReloadMixin):
     @staticmethod
     def _windows_restart() -> tuple[bool, str]:
         """
-        执行Windows重启操作。
+        执行 Windows 重启。安装版优先走同级 RebotMP，找不到再回退 MoviePilot-V3.exe。
+
+        state.py 位于安装目录下的 MoviePilot/app/runtime/，parents[3] 是安装根，
+        RebotMP.exe 或 RebotMP.bat 由 NSSM 安装包放在这里。
         """
         def cmd(command: list[str]) -> Tuple[bool, str]:
             """
@@ -275,13 +278,19 @@ class SystemHelper(ConfigReloadMixin):
             except Exception as error:
                 return False, f"cmd命令{command}执行失败.原因:{str(error)}"
 
-        mp_exe = str(Path(__file__).parents[3].parent / "MoviePilot-V3.exe")
-        if not Path(mp_exe).exists():
-            return False, f"{mp_exe} 文件不存在, 无法执行重启"
-        success, message = cmd(["start", "", mp_exe, "-c", "restart"])
-        if not success:
-            return False, message
-        return True, ""
+        install_root = Path(__file__).resolve().parents[3]
+        for name in ("RebotMP.exe", "RebotMP.bat", "MoviePilot-V3.exe"):
+            target = install_root / name
+            if not target.exists():
+                continue
+            command = ["start", "", str(target)]
+            if name == "MoviePilot-V3.exe":
+                command.extend(["-c", "restart"])
+            success, message = cmd(command)
+            if not success:
+                return False, message
+            return True, ""
+        return False, f"未找到重启程序：{install_root / 'RebotMP.exe'}"
 
     @staticmethod
     def restart() -> Tuple[bool, str]:
