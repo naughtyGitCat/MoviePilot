@@ -14,6 +14,12 @@
 
 Redesigned from parts of [NAStool](https://github.com/NAStool/nas-tools), with a stronger focus on core automation scenarios while reducing issues and making the project easier to extend and maintain.
 
+> [!TIP]
+> **Windows Releases & Installer**
+> This fork maintains Windows NSSM adaptations on the `v3-static` branch.
+> Pre-compiled Windows installer packages (`.exe`) are built and published in the dedicated packaging repository:
+> 👉 **[Download Windows Releases (naughtyGitCat/Windows-MoviePilot Releases)](https://github.com/naughtyGitCat/Windows-MoviePilot/releases)**
+
 # For learning and personal communication only. Please do not promote this project on platforms in mainland China.
 
 Release channel: https://t.me/moviepilot_channel

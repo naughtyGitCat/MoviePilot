@@ -14,6 +14,12 @@
 
 基于 [NAStool](https://github.com/NAStool/nas-tools) 部分代码重新设计，聚焦自动化核心需求，减少问题同时更易于扩展和维护。
 
+> [!TIP]
+> **Windows 安装版发布指引**
+> 本 Fork 仓库主要维护 Windows NSSM 安装版源码与补丁适配（`v3-static` 分支）。
+> 已编译打包的 Windows 安装程序（`.exe`）由构建流水线自动发布在独立发布仓库：
+> 👉 **[下载 Windows 安装包 (naughtyGitCat/Windows-MoviePilot Releases)](https://github.com/naughtyGitCat/Windows-MoviePilot/releases)**
+
 # 仅用于学习交流使用，请勿在任何国内平台宣传该项目！
 
 发布频道：https://t.me/moviepilot_channel
